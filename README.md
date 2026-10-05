@@ -2,3 +2,4 @@
 
 ## Team Members
 Nate Barad
+Logan Tran
