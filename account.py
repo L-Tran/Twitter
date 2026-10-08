@@ -11,6 +11,7 @@ class account:
         pass
 
     def follow(self, account):
+          # Add account to following list add to account's followers
           self.following.append(account)
           account.followers.append(self)
 

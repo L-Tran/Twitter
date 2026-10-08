@@ -44,12 +44,14 @@ class twitter:
 
     def make_post(self, text, hashtag):
         pass
+
     def follow(self, account):
         self.current_user.follow(account)
 
-
-    def logged_out_menu(self):
+    # Main menu function / what user when logged out
+    def menu(self):
         print("Welcome to ATCS Twitter!")
+        # Ensure user chooses a proper option
         while True:
             print("1. Log in")
             print("2. Create an account")
@@ -58,46 +60,77 @@ class twitter:
                 return choice
             print("That's not a valid option. Please enter 1 or 2.")
 
-    def view_feed(self):
-        # Collect posts from people I follow, newest first
+    # Show posts one at a time until the user types 'back' or runs out of posts
+    # Abstraction for both view post functions
+    # I thought of the abstraction AI helped me think of how to transfer the messages by passing them through parameters
+    def show_posts(self, posts, empty_message, done_message):
+        if len(posts) == 0:
+            print(empty_message)
+            return
+
+        for p in posts:
+            print(p)
+            # Enter will keep showing posts
+            choice = input("Press Enter for the next post, or type 'back' to return to the menu: ").strip().lower()
+            if choice == "back":
+                return
+        print(done_message)
+
+    def view_feed_followers(self):
+        # Collect posts from people current user follows, newest first
         feed = []
+        # Reverse for newest first AI helped come up with it
         for p in reversed(self.all_posts):
             if p.poster in self.current_user.following:
                 feed.append(p)
 
-        # Show one post at a time
-        for p in feed:
-            print(p)
-            choice = input("Press Enter for the next post, or type 'back' to return to the menu: ").strip().lower()
-            if choice == "back":
-                return
-        print("You are up to date!")
+        self.show_posts(feed, "There are no posts from people you follow yet.", "You are up to date!")
 
-    def logged_in_menu(self):
+    # AI helped with lstrip to get the # away
+    def search_hashtag(self):
+        # Get the hashtag without the # case doesn't matter
+        tag = input("Enter a hashtag to search (without the #): ").strip().lstrip("#").lower()
+
+        # Collect posts with an exact match on the hashtag, newest first
+        results = []
+        for p in reversed(self.all_posts):
+            if p.hashtag is not None and p.hashtag.strip().lstrip("#").lower() == tag:
+                results.append(p)
+
+        self.show_posts(results, "There are no posts with #" + tag, "You have seen all posts with #" + tag + "!")
+
+    # Homepage / what the user sees when logged out
+    def homepage(self):
+        # Ensure user chooses valid option
         while True:
             print("1. View feed")
-            print("2. Log out")
-            choice = input("Choose an option (1 or 2): ").strip()
+            print("2. Search hashtag")
+            print("3. Log out")
+            choice = input("Choose an option (1, 2, or 3): ").strip()
+            # Execute user's choice
             if choice == "1":
-                self.view_feed()
+                self.view_feed_followers()
             elif choice == "2":
+                self.search_hashtag()
+            elif choice == "3":
                 self.logout()
                 return
             else:
-                print("That's not a valid option. Please enter 1 or 2.")
+                print("That's not a valid option. Please enter 1, 2, or 3.")
 
     def main_loop(self):
         while True:
-            
-            choice = self.logged_out_menu()
+            # Initialize main menu
+            choice = self.menu()
+            # Execute user choice
             if choice == "1":
                 print("You chose to log in.")
                 self.login()
             else:
-                print("You chose to create an account.")  # TODO: call self.create_account(...)
+                print("You chose to create an account.")
                 self.create_account()
             if self.current_user is not None:
-                self.logged_in_menu()
+                self.homepage()
 
 if __name__ == "__main__":
     twitter().main_loop()
