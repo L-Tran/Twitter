@@ -8,10 +8,20 @@ class twitter:
         self.current_user = None
         self.all_posts = []  # every post ever made, oldest first
 
-    def create_account(self, username, password):
-        pass
+    def create_account(self):
+        try:
+            username = input("Please enter the username for your new account:")
+        except any([username == account.username for account in self.accounts]):
+            print("You need a unique username")
+        password = input("Please enter the password for your new account:")
+        self.accounts.append(account(username, password))
+        print("you are now logged in to the new account")
+        self.login(username, password)
+
     def login(self, username, password):
+        #for account in accounts:
         pass
+
     def logout(self):
         pass
 
@@ -66,7 +76,7 @@ class twitter:
             print("You chose to log in.")  # TODO: call self.login(...)
         else:
             print("You chose to create an account.")  # TODO: call self.create_account(...)
-
+            self.create_account()
 
 if __name__ == "__main__":
     twitter().main_loop()
