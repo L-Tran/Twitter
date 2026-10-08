@@ -22,9 +22,28 @@ class twitter:
 
 
     def logged_out_menu(self):
+        print("Welcome to ATCS Twitter!")
+        while True:
+            print("1. Log in")
+            print("2. Create an account")
+            choice = input("Choose an option (1 or 2): ").strip()
+            if choice == "1" or choice == "2":
+                return choice
+            print("That's not a valid option. Please enter 1 or 2.")
+
+    def logged_in_menu(self):
         pass
-    def logged_in_manu(self):
-        pass
+
     def main_loop(self):
-        pass
+        choice = self.logged_out_menu()
+        if choice == "1":
+            print("You chose to log in.")  # TODO: call self.login(...)
+        else:
+            print("You chose to create an account.")  # TODO: call self.create_account(...)
+
+
+if __name__ == "__main__":
+    twitter().main_loop()
+
+
     
