@@ -41,9 +41,18 @@ class twitter:
     def logout(self):
         self.current_user = None
 
+    def post(self):
+        while True:
+            text = input("What do you want to post? ").strip()
+            if text != '':
+                break
+            print("Your post can't be empty")
+        hashtag = input("What's the hashtag? (optional, press enter if you don't want it)")
+        this_post = post(text, hashtag, self.current_user)
+        self.current_user.posts.append(this_post)
+        self.all_posts.append(this_post)
 
-    def make_post(self, text, hashtag):
-        pass
+        
     def follow(self, account):
         self.current_user.follow(account)
 
@@ -77,14 +86,17 @@ class twitter:
         while True:
             print("1. View feed")
             print("2. Log out")
-            choice = input("Choose an option (1 or 2): ").strip()
+            print("3. Post")
+            choice = input("Choose an option (1-3): ").strip()
             if choice == "1":
                 self.view_feed()
             elif choice == "2":
                 self.logout()
                 return
+            elif choice == "3":
+                self.post()
             else:
-                print("That's not a valid option. Please enter 1 or 2.")
+                print("That's not a valid option. Please enter an option 1-3.")
 
     def main_loop(self):
         while True:
