@@ -9,6 +9,7 @@ class twitter:
         self.all_posts = []  # every post ever made, oldest first
 
     def create_account(self):
+        # Ask for a username until it is non-empty and not already taken
         while True:
             username = input("Please enter the username for your new account: ").strip()
             if username == '':
@@ -18,6 +19,7 @@ class twitter:
             else:
                 break
 
+        # Ask for a password until it is non-empty
         while True:
             password = input("Please enter the password for your new account: ")
             if password == '':
@@ -25,29 +27,36 @@ class twitter:
             else:
                 break
 
+        # Create the account, save it, and log the user into it
         self.accounts.append(account(username, password))
         print("you are now logged in to the new account")
         self.current_user = self.accounts[-1]
 
     def login(self):
+        # Ask for credentials and log in if an account matches both
         username = input("Please enter your username: ").strip()
         password = input("Please enter your password: ")
         for acc in self.accounts:
             if acc.username == username and acc.password == password:
                 self.current_user = acc
                 return
+        # No account matched, so nobody is logged in
         print("There is no account with that username and password")
 
     def logout(self):
+        # No current user means we are logged out
         self.current_user = None
 
     def post(self):
+        # Ask for the post text until it is non-empty
         while True:
             text = input("What do you want to post? ").strip()
             if text != '':
                 break
             print("Your post can't be empty")
+        # Hashtag is optional (empty string if skipped)
         hashtag = input("What's the hashtag? (optional, press enter if you don't want it)")
+        # Save the post on the user's account and in the global list used by feeds
         this_post = post(text, hashtag, self.current_user)
         self.current_user.posts.append(this_post)
         self.all_posts.append(this_post)
