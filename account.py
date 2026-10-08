@@ -11,6 +11,7 @@ class account:
         pass
 
     def follow(self, account):
+          self.following.append(account)
           account.followers.append(self)
 
     def __repr__(self):
