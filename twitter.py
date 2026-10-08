@@ -9,21 +9,37 @@ class twitter:
         self.all_posts = []  # every post ever made, oldest first
 
     def create_account(self):
-        try:
-            username = input("Please enter the username for your new account:")
-        except any([username == account.username for account in self.accounts]):
-            print("You need a unique username")
-        password = input("Please enter the password for your new account:")
+        while True:
+            username = input("Please enter the username for your new account: ").strip()
+            if username == '':
+                print("You need to have something for your username")
+            elif any(acc.username == username for acc in self.accounts):
+                print("You need a unique username")
+            else:
+                break
+
+        while True:
+            password = input("Please enter the password for your new account: ")
+            if password == '':
+                print("You need to have a password")
+            else:
+                break
+
         self.accounts.append(account(username, password))
         print("you are now logged in to the new account")
-        self.login(username, password)
+        self.current_user = self.accounts[-1]
 
-    def login(self, username, password):
-        #for account in accounts:
-        pass
+    def login(self):
+        username = input("Please enter your username: ").strip()
+        password = input("Please enter your password: ")
+        for acc in self.accounts:
+            if acc.username == username and acc.password == password:
+                self.current_user = acc
+                return
+        print("There is no account with that username and password")
 
     def logout(self):
-        pass
+        self.current_user = None
 
 
     def make_post(self, text, hashtag):
@@ -71,12 +87,17 @@ class twitter:
                 print("That's not a valid option. Please enter 1 or 2.")
 
     def main_loop(self):
-        choice = self.logged_out_menu()
-        if choice == "1":
-            print("You chose to log in.")  # TODO: call self.login(...)
-        else:
-            print("You chose to create an account.")  # TODO: call self.create_account(...)
-            self.create_account()
+        while True:
+            
+            choice = self.logged_out_menu()
+            if choice == "1":
+                print("You chose to log in.")
+                self.login()
+            else:
+                print("You chose to create an account.")  # TODO: call self.create_account(...)
+                self.create_account()
+            if self.current_user is not None:
+                self.logged_in_menu()
 
 if __name__ == "__main__":
     twitter().main_loop()

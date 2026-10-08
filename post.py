@@ -1,5 +1,5 @@
 class post:
-    def __init__(self, text, hashtag, poster= 0):
+    def __init__(self, text, hashtag, poster = None):
         self.text = text
         self.hashtag = hashtag
         self.poster = poster
