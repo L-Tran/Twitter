@@ -1,4 +1,5 @@
 from post import post
+
 class account:
     def __init__(self, username, password):
             self.username = username
@@ -7,13 +8,9 @@ class account:
             self.following = []
             self.posts = []
 
-    def post(self, text, hashtag):
-        pass
-
     def follow(self, account):
           self.following.append(account)
           account.followers.append(self)
 
     def __repr__(self):
-            pass
-    
+        pass
