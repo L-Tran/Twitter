@@ -94,6 +94,10 @@ class twitter:
         elif choice != "":
             print("That's not a valid option.")
 
+    def valid_menu_choice(self, choice):
+        # Returns True if the choice is "1" or "2" (spaces ignored)
+        return choice.strip() == "1" or choice.strip() == "2"
+
     # Main menu function / what user sees when logged out
     def logged_out_menu(self):
         print("Welcome to ATCS Twitter!")
@@ -102,7 +106,8 @@ class twitter:
             print("1. Log in")
             print("2. Create an account")
             choice = input("Choose an option (1 or 2): ").strip()
-            if choice == "1" or choice == "2":
+            # Only leave the loop once the choice is valid
+            if self.valid_menu_choice(choice):
                 return choice
             print("That's not a valid option. Please enter 1 or 2.")
 
@@ -169,8 +174,10 @@ class twitter:
         for p in reversed(self.all_posts):
             if p.poster in self.current_user.following:
                 feed.append(p)
+        return feed
 
-        self.show_posts(feed, "There are no posts from people you follow yet.", "You are up to date!")
+    def view_feed(self):
+        self.show_posts(self.get_feed(), "There are no posts from people you follow yet.", "You are up to date!")
 
     # AI helped with lstrip to get the # away
     def search_hashtag(self):
