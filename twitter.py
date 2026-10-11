@@ -62,7 +62,36 @@ class twitter:
         self.all_posts.append(this_post)
 
     def follow(self, account):
-        self.current_user.follow(account)
+        # Tell the user why the follow didn't work, or confirm it did
+        if account is self.current_user:
+            print("You can't follow yourself")
+        elif not self.current_user.follow(account):
+            print("You already follow " + account.username)
+        else:
+            print("You are now following " + account.username)
+
+    def who_to_follow(self):
+        # Everyone except yourself and people you already follow
+        options = []
+        # Find all accounts that aren't you or your following
+        for acc in self.accounts:
+            if acc is not self.current_user and acc not in self.current_user.following:
+                options.append(acc)
+
+        if len(options) == 0:
+            print("There is nobody new to follow right now.")
+            return
+        
+        # Print options
+        for i in range(len(options)):
+            print(str(i + 1) + ". " + options[i].username)
+
+        # Pick a number to follow them, or go back
+        choice = input("Enter a number to follow them, or press Enter to go back: ").strip()
+        if choice.isdigit() and 1 <= int(choice) <= len(options):
+            self.follow(options[int(choice) - 1])
+        elif choice != "":
+            print("That's not a valid option.")
 
     # Main menu function / what user sees when logged out
     def logged_out_menu(self):
@@ -86,10 +115,17 @@ class twitter:
 
         for p in posts:
             print(p)
+            # Only offer follow if it's not you and you don't already follow them
+            can_follow = p.poster is not self.current_user and p.poster not in self.current_user.following
             # Enter will keep showing posts
-            choice = input("Press Enter for the next post, or type 'back' to return to the menu: ").strip().lower()
+            if can_follow:
+                choice = input("Press Enter for the next post, type 'follow' to follow " + p.poster.username + ", or type 'back' to return to the menu: ").strip().lower()
+            else:
+                choice = input("Press Enter for the next post, or type 'back' to return to the menu: ").strip().lower()
             if choice == "back":
                 return
+            if choice == "follow" and can_follow:
+                self.follow(p.poster)
         print(done_message)
 
     def view_feed(self):
@@ -122,8 +158,9 @@ class twitter:
             print("1. View feed")
             print("2. Search hashtag")
             print("3. Post")
-            print("4. Log out")
-            choice = input("Choose an option (1-4): ").strip()
+            print("4. Who to follow")
+            print("5. Log out")
+            choice = input("Choose an option (1-5): ").strip()
             # Execute user's choice
             if choice == "1":
                 self.view_feed()
@@ -132,10 +169,12 @@ class twitter:
             elif choice == "3":
                 self.post()
             elif choice == "4":
+                self.who_to_follow()
+            elif choice == "5":
                 self.logout()
                 return
             else:
-                print("That's not a valid option. Please enter an option 1-4.")
+                print("That's not a valid option. Please enter an option 1-5.")
 
     def main_loop(self):
         while True:

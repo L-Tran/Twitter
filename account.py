@@ -9,9 +9,13 @@ class account:
             self.posts = []
 
     def follow(self, account):
+          # You can't follow yourself or the same person twice
+          if account is self or account in self.following:
+                return False
           # Add account to following list add to account's followers
           self.following.append(account)
           account.followers.append(self)
+          return True
 
     def __repr__(self):
-        pass
+        return self.username
