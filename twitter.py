@@ -1,3 +1,4 @@
+import sys
 from account import account
 from post import post
 
@@ -108,18 +109,58 @@ class twitter:
     # Show posts one at a time until the user types 'back' or runs out of posts
     # Abstraction for both view post functions
     # I thought of the abstraction AI helped me think of how to transfer the messages by passing them through parameters
-    def show_posts(self, posts, empty_message, done_message):
+    def show_posts(self, posts, empty_message, done_message, allow_profile=True):
         if len(posts) == 0:
             print(empty_message)
             return
 
         for p in posts:
             print(p)
-            # Enter will keep showing posts
-            choice = input("Press Enter for the next post, or type 'back' to return to the menu: ").strip().lower()
-            if choice == "back":
-                return
+            # Keep asking about this post until the user moves on or goes back
+            while True:
+                if allow_profile:
+                    prompt = "Press Enter for the next post, type 'profile' to view " + p.poster.username + "'s profile, or 'back' to return to the menu: "
+                else:
+                    prompt = "Press Enter for the next post, or type 'back' to return to the menu: "
+                choice = input(prompt).strip().lower()
+                if choice == "back":
+                    return
+                elif choice == "profile" and allow_profile:
+                    self.view_profile(p.poster)
+                elif choice == "":
+                    break
+                else:
+                    print("That's not a valid option.")
         print(done_message)
+
+    def view_profile(self, account):
+        # Show an account's info, then let the user browse their posts or follow them
+        while True:
+            print("--- " + account.username + "'s profile ---")
+            print("Followers: " + str(len(account.followers)) + " | Following: " + str(len(account.following)) + " | Posts: " + str(len(account.posts)))
+            if account is not self.current_user:
+                if account in self.current_user.following:
+                    print("You follow this person.")
+                else:
+                    print("You don't follow this person.")
+            # Only offer follow if it's someone else you don't follow yet
+            can_follow = account is not self.current_user and account not in self.current_user.following
+            print("1. View posts")
+            if can_follow:
+                print("2. Follow")
+            back = "3" if can_follow else "2"
+            print(back + ". Back")
+            choice = input("Choose an option: ").strip()
+            if choice == "1":
+                # Newest first; no profile option since we're already here
+                self.show_posts(list(reversed(account.posts)), account.username + " hasn't posted anything yet.",
+                                "You have seen all of " + account.username + "'s posts!", allow_profile=False)
+            elif choice == "2" and can_follow:
+                self.follow(account)
+            elif choice == back:
+                return
+            else:
+                print("That's not a valid option.")
 
     def view_feed(self):
         # Collect posts from people current user follows, newest first
@@ -153,7 +194,8 @@ class twitter:
             print("3. Post")
             print("4. Who to follow")
             print("5. Log out")
-            choice = input("Choose an option (1-5): ").strip()
+            print("6. Close program")
+            choice = input("Choose an option (1-6): ").strip()
             # Execute user's choice
             if choice == "1":
                 self.view_feed()
@@ -166,8 +208,11 @@ class twitter:
             elif choice == "5":
                 self.logout()
                 return
+            elif choice == "6":
+                print("Goodbye!")
+                sys.exit()
             else:
-                print("That's not a valid option. Please enter an option 1-5.")
+                print("That's not a valid option. Please enter an option 1-6.")
 
     def main_loop(self):
         while True:
