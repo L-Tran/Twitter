@@ -115,17 +115,10 @@ class twitter:
 
         for p in posts:
             print(p)
-            # Only offer follow if it's not you and you don't already follow them
-            can_follow = p.poster is not self.current_user and p.poster not in self.current_user.following
             # Enter will keep showing posts
-            if can_follow:
-                choice = input("Press Enter for the next post, type 'follow' to follow " + p.poster.username + ", or type 'back' to return to the menu: ").strip().lower()
-            else:
-                choice = input("Press Enter for the next post, or type 'back' to return to the menu: ").strip().lower()
+            choice = input("Press Enter for the next post, or type 'back' to return to the menu: ").strip().lower()
             if choice == "back":
                 return
-            if choice == "follow" and can_follow:
-                self.follow(p.poster)
         print(done_message)
 
     def view_feed(self):
