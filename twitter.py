@@ -105,11 +105,15 @@ class twitter:
         while True:
             print("1. Log in")
             print("2. Create an account")
-            choice = input("Choose an option (1 or 2): ").strip()
+            print("3. Close program")
+            choice = input("Choose an option (1-3): ").strip()
+            if choice == "3":
+                print("Goodbye!")
+                sys.exit()
             # Only leave the loop once the choice is valid
             if self.valid_menu_choice(choice):
                 return choice
-            print("That's not a valid option. Please enter 1 or 2.")
+            print("That's not a valid option. Please enter an option 1-3.")
 
     # Show posts one at a time until the user types 'back' or runs out of posts
     # Abstraction for both view post functions
@@ -167,7 +171,7 @@ class twitter:
             else:
                 print("That's not a valid option.")
 
-    def view_feed(self):
+    def get_feed(self):
         # Collect posts from people current user follows, newest first
         feed = []
         # Reverse for newest first AI helped come up with it
@@ -180,17 +184,20 @@ class twitter:
         self.show_posts(self.get_feed(), "There are no posts from people you follow yet.", "You are up to date!")
 
     # AI helped with lstrip to get the # away
-    def search_hashtag(self):
+    def get_hashtag_posts(self, tag):
         # Get the hashtag without the # case doesn't matter
-        tag = input("Enter a hashtag to search (without the #): ").strip().lstrip("#").lower()
+        tag = tag.strip().lstrip("#").lower()
 
         # Collect posts with an exact match on the hashtag, newest first
         results = []
         for p in reversed(self.all_posts):
             if p.hashtag is not None and p.hashtag.strip().lstrip("#").lower() == tag:
                 results.append(p)
+        return results
 
-        self.show_posts(results, "There are no posts with #" + tag, "You have seen all posts with #" + tag + "!")
+    def search_hashtag(self):
+        tag = input("Enter a hashtag to search (without the #): ").strip().lstrip("#").lower()
+        self.show_posts(self.get_hashtag_posts(tag), "There are no posts with #" + tag, "You have seen all posts with #" + tag + "!")
 
     # Homepage / what the user sees when logged in
     def logged_in_menu(self):
@@ -201,8 +208,7 @@ class twitter:
             print("3. Post")
             print("4. Who to follow")
             print("5. Log out")
-            print("6. Close program")
-            choice = input("Choose an option (1-6): ").strip()
+            choice = input("Choose an option (1-5): ").strip()
             # Execute user's choice
             if choice == "1":
                 self.view_feed()
@@ -215,11 +221,8 @@ class twitter:
             elif choice == "5":
                 self.logout()
                 return
-            elif choice == "6":
-                print("Goodbye!")
-                sys.exit()
             else:
-                print("That's not a valid option. Please enter an option 1-6.")
+                print("That's not a valid option. Please enter an option 1-5.")
 
     def main_loop(self):
         while True:
