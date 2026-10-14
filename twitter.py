@@ -5,6 +5,10 @@ from post import post
 
 SAVE_FILE = "save.json"
 
+# Raised when the save file can't be loaded
+class InvalidSaveError(Exception):
+    pass
+
 class twitter:
     def __init__(self):
         self.accounts = []
@@ -22,22 +26,27 @@ class twitter:
             json.dump(data, f)
 
     def load(self):
-        # Returns False if the save is missing or unreadable so the caller can start fresh
+        # Raises InvalidSaveError if the save is missing or broken so the caller can start fresh
         try:
             with open(SAVE_FILE) as f:
                 data = json.load(f)
             accounts = {d["username"]: account(d["username"], d["password"]) for d in data["accounts"]}
-        except (FileNotFoundError, ValueError):
-            return False
-        for d in data["accounts"]:
-            for name in d["following"]:
-                accounts[d["username"]].follow(accounts[name])
-        for d in data["posts"]:
-            p = post(d["text"], d["hashtag"], accounts[d["poster"]])
-            p.poster.posts.append(p)
-            self.all_posts.append(p)
+            for d in data["accounts"]:
+                for name in d["following"]:
+                    accounts[d["username"]].follow(accounts[name])
+            posts = []
+            for d in data["posts"]:
+                p = post(d["text"], d["hashtag"], accounts[d["poster"]])
+                p.poster.posts.append(p)
+                posts.append(p)
+        except FileNotFoundError:
+            raise InvalidSaveError("There is no save file.")
+        except (ValueError, KeyError, TypeError):
+            # Bad JSON, a missing field, or a follow/post pointing at an account that doesn't exist
+            raise InvalidSaveError("The save file is broken.")
+        # Only replace our data once everything loaded without errors
         self.accounts = list(accounts.values())
-        return True
+        self.all_posts = posts
 
     def start_menu(self):
         # First thing the user sees: load the saved data or start fresh
@@ -46,10 +55,12 @@ class twitter:
             print("2. Start new")
             choice = input("Choose an option (1-2): ").strip()
             if choice == "1":
-                if self.load():
+                try:
+                    self.load()
                     print("Save loaded.")
                     return
-                print("No valid save found. Please start a new twitter")
+                except InvalidSaveError as e:
+                    print(str(e) + " Please start a new twitter")
             elif choice == "2":
                 return
             else:

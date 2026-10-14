@@ -1,6 +1,7 @@
 import os
+import pytest
 import twitter as twitter_module
-from twitter import twitter
+from twitter import twitter, InvalidSaveError
 from account import account
 from post import post
 
@@ -32,7 +33,7 @@ def test_load_restores_accounts():
     # Usernames and passwords survive a save and load
     make_saved_twitter()
     t = twitter()
-    assert t.load() == True
+    t.load()
     assert t.accounts[0].username == "bob"
     assert t.accounts[0].password == "pw1"
     assert t.accounts[1].username == "al"
@@ -62,9 +63,10 @@ def test_load_restores_posts():
     os.remove(TEST_FILE)
 
 
-def test_load_without_save_returns_false():
-    # No save file means load fails and nothing is added
+def test_load_without_save_raises_error():
+    # No save file means load raises InvalidSaveError and nothing is added
     twitter_module.SAVE_FILE = "does_not_exist.json"
     t = twitter()
-    assert t.load() == False
+    with pytest.raises(InvalidSaveError):
+        t.load()
     assert t.accounts == []
