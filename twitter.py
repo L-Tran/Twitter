@@ -1,12 +1,59 @@
 import sys
+import json
 from account import account
 from post import post
+
+SAVE_FILE = "save.json"
 
 class twitter:
     def __init__(self):
         self.accounts = []
         self.current_user = None
         self.all_posts = []  # every post ever made, oldest first
+
+    def save(self):
+        # Store accounts and posts by username so references can be rebuilt on load
+        data = {
+            "accounts": [{"username": a.username, "password": a.password,
+                          "following": [f.username for f in a.following]} for a in self.accounts],
+            "posts": [{"text": p.text, "hashtag": p.hashtag, "poster": p.poster.username} for p in self.all_posts]
+        }
+        with open(SAVE_FILE, "w") as f:
+            json.dump(data, f)
+
+    def load(self):
+        # Returns False if the save is missing or unreadable so the caller can start fresh
+        try:
+            with open(SAVE_FILE) as f:
+                data = json.load(f)
+            accounts = {d["username"]: account(d["username"], d["password"]) for d in data["accounts"]}
+        except (FileNotFoundError, ValueError):
+            return False
+        for d in data["accounts"]:
+            for name in d["following"]:
+                accounts[d["username"]].follow(accounts[name])
+        for d in data["posts"]:
+            p = post(d["text"], d["hashtag"], accounts[d["poster"]])
+            p.poster.posts.append(p)
+            self.all_posts.append(p)
+        self.accounts = list(accounts.values())
+        return True
+
+    def start_menu(self):
+        # First thing the user sees: load the saved data or start fresh
+        while True:
+            print("1. Load from save")
+            print("2. Start new")
+            choice = input("Choose an option (1-2): ").strip()
+            if choice == "1":
+                if self.load():
+                    print("Save loaded.")
+                    return
+                print("No valid save found. Please start a new twitter")
+            elif choice == "2":
+                return
+            else:
+                print("That's not a valid option. Please enter an option 1-2.")
 
     def create_account(self):
         # Ask for a username until it is non-empty and not already taken
@@ -29,6 +76,7 @@ class twitter:
 
         # Create the account, save it, and log the user into it
         self.accounts.append(account(username, password))
+        self.save()
         print("you are now logged in to the new account")
         self.current_user = self.accounts[-1]
 
@@ -61,6 +109,7 @@ class twitter:
         this_post = post(text, hashtag, self.current_user)
         self.current_user.posts.append(this_post)
         self.all_posts.append(this_post)
+        self.save()
 
     def follow(self, account):
         # Tell the user why the follow didn't work, or confirm it did
@@ -70,6 +119,7 @@ class twitter:
             print("You already follow " + account.username)
         else:
             print("You are now following " + account.username)
+            self.save()
 
     def who_to_follow(self):
         # Everyone except yourself and people you already follow
@@ -225,6 +275,7 @@ class twitter:
                 print("That's not a valid option. Please enter an option 1-5.")
 
     def main_loop(self):
+        self.start_menu()
         while True:
             # Initialize main menu
             choice = self.logged_out_menu()

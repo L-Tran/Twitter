@@ -1,0 +1,1 @@
+{"accounts": [{"username": "nate", "password": "barad", "following": []}, {"username": "logan", "password": "tran", "following": ["nate"]}], "posts": [{"text": "yum", "hashtag": "food", "poster": "nate"}, {"text": "hinate", "hashtag": "greet", "poster": "nate"}]}
